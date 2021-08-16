@@ -1,0 +1,22 @@
+name: Project Card Demo
+on:
+  project_card:
+    types:
+      - moved
+jobs:
+  notification_slack:
+    runs-on: ubuntu-latest
+    if: github.event.project_card.column_id == '15554237'
+    steps:
+      - name: get_issue_info
+        id: issue_url
+        run: |
+          url=`echo ${{ github.event.project_card.content_url }} | sed -e "s/api\.//"`
+          url=`echo $url | sed -e "s/repos\///"`
+          echo "::set-output name=MY_VALUE::${url}"
+      - name: Slack Notification
+        uses: tokorom/action-slack-incoming-webhook@main
+        env:
+          INCOMING_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        with:
+          text: ${{ steps.issue_url.outputs.MY_VALUE }}
